@@ -51,13 +51,58 @@ sheet.MainTag.parentNode.style.height = "680px";
 ```
 
 
-## 3. Automatic Height Adjustment Based on Loaded Data
+## 3. React SPA Flex Chain Pattern
+
+In React SPA environments, `calc(100% - Npx)` alone may not reliably fill the remaining space. Instead, use a **flex chain** structure where every ancestor from the screen root to the IBSheet wrapper participates in flex layout.
+
+```css
+/* Every level must participate in the flex chain */
+.screen-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;          /* or 100vh for the outermost container */
+}
+
+.body-area {
+  flex: 1;
+  overflow: hidden;      /* prevent content from pushing height */
+}
+
+.grid-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.grid-section > div {
+  height: 100%;          /* IBSheet wrapper — takes the remaining height */
+}
+```
+
+```html
+<!-- React component structure example -->
+<div className="screen-container">
+  <Header />                          <!-- fixed height -->
+  <div className="body-area">
+    <SearchPanel />                   <!-- fixed height -->
+    <div className="grid-section">
+      <div id="sheetDIV" style={{ width: '100%', height: '100%' }} />
+    </div>
+  </div>
+</div>
+```
+
+> **Key point:** If any single level in the chain is missing `flex:1` or `overflow:hidden`, the IBSheet wrapper receives 0px height and the sheet will not render. When debugging height issues in SPA, inspect each ancestor from the sheet upward and verify the flex chain is unbroken.
+
+
+## 4. Automatic Height Adjustment Based on Loaded Data
 
 To automatically adjust the sheet height based on the amount of loaded data, use (Cfg)[NoVScroll](/docs/props/cfg/no-v-scroll):1.
 
 NoVScroll does not work with SearchMode:0.
 
-## 4. Setting Maximum Height for the Sheet
+## 5. Setting Maximum Height for the Sheet
 
 To show a smaller height when there is little loaded data, and fix the sheet height with a vertical scrollbar when the data exceeds a certain number of rows, call the following logic in the search completion event ([onSearchFinish](/docs/events/on-search-finish)).
 
