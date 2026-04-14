@@ -1,44 +1,44 @@
-# Validation
+# 유효성 검사 (Validation)
 
-IBSheet8 supports validation across three stages: during editing, on edit completion, and on save.
+IBSheet8은 편집 중, 편집 완료 시, 저장 시 세 단계에 걸쳐 유효성 검사를 지원합니다.
 
 ---
 
-## 1. Validation During Editing - EditMask
+## 1. 편집 중 유효성 검사 - EditMask
 
-Restricts characters that can be entered during cell editing using JavaScript regular expressions. Characters that do not match the regular expression cannot be entered at all.
+셀 편집 중 입력 가능한 문자를 자바스크립트 정규식으로 제한합니다. 정규식에 맞지 않는 글자는 입력 자체가 되지 않습니다.
 
-Internally, the check `"inputValue".search(EditMask) >= 0` is used; if `true`, input is allowed; if `false`, input is restricted.
+내부적으로 `"입력값".search(EditMask) >= 0` 판정을 사용하며, `true`이면 입력 허용, `false`이면 입력 제한됩니다.
 
-### Column Level Settings
+### 컬럼 레벨 설정
 
 ```javascript
 options.Cols = [
-  // Only numbers can be entered
+  // 숫자만 입력 가능
   { Type: "Text", Name: "code", EditMask: "^\\d*$", Width: 100 },
-  // Only alphabetic characters can be entered
+  // 알파벳만 입력 가능
   { Type: "Text", Name: "engName", EditMask: "^\\w*$", Width: 120 },
-  // All characters except spaces can be entered
+  // 띄어쓰기를 제외한 모든 글자 입력 가능
   { Type: "Text", Name: "noSpace", EditMask: "^\\S*$", Width: 120 },
-  // Only up to 10 digit numbers allowed
+  // 최대 10자리 숫자만 가능
   { Type: "Text", Name: "shortNum", EditMask: "^\\d{0,10}$", Width: 100 }
 ];
 ```
 
-### Cell Level Settings
+### 셀 레벨 설정
 
-You can apply EditMask to specific cells only, or specify it differently for each cell in retrieved data.
+특정 셀에만 EditMask를 적용하거나 조회 데이터에서 셀별로 다르게 지정할 수 있습니다.
 
 ```javascript
-// 1. Apply to a specific cell using setAttribute
+// 1. setAttribute로 특정 셀에 적용
 sheet.setAttribute(sheet.getRowById("AR99"), "CLS", "EditMask", "^\\S*$");
 
-// 2. Set directly on the data row object
+// 2. 데이터 로우 객체에 직접 설정
 var row = sheet.getRowById("AR10");
 row["CLSEditMask"] = "^\\w*$";
 sheet.refreshCell({ row: row, col: "CLS" });
 
-// 3. Specify per cell in retrieved data
+// 3. 조회 데이터에서 셀별 지정
 {
   data: [
     { "CLSEditMask": "^\\d{0,10}$" }
@@ -48,120 +48,120 @@ sheet.refreshCell({ row: row, col: "CLS" });
 
 ---
 
-## 2. Validation on Edit Completion - ResultMask
+## 2. 편집 완료 시 유효성 검사 - ResultMask
 
-Validates the entire entered value with a regular expression when cell editing ends. Unlike EditMask which restricts at the character input level, ResultMask validates the final value at the point of edit completion.
+셀 편집 종료 시 입력된 값 전체를 정규식으로 검사합니다. EditMask가 글자 입력 시점에서 제한하는 것과 달리, ResultMask는 편집 완료 시점에 최종 값을 검증합니다.
 
-### Basic Usage
+### 기본 사용법
 
 ```javascript
 options.Cols = [
-  // Email validation - display alert message
+  // 이메일 검증 - alert 메시지 표시
   {
     Type: "Text",
     Name: "email",
     ResultMask: "^[\\w\\.\\+%-]+@[A-Za-z0-9\\.-]+\\.[A-Za-z]{2,6}$",
-    ResultText: "Please check the email address.",
+    ResultText: "이메일 주소를 확인해 주세요.",
     Width: 200
   },
-  // Email validation - display DIV layer popup message
+  // 이메일 검증 - DIV 레이어 팝업 메시지 표시
   {
     Type: "Text",
     Name: "email2",
     ResultMask: "^[\\w\\.\\+%-]+@[A-Za-z0-9\\.-]+\\.[A-Za-z]{2,6}$",
-    ResultMessage: "Please check the email address.",
+    ResultMessage: "이메일 주소를 확인해 주세요.",
     ResultMessageTime: 800,
     Width: 200
   },
-  // ID validation - 6 to 10 alphabetic characters
+  // 아이디 검증 - 6~10자 영문
   {
     Type: "Text",
     Name: "userId",
     ResultMask: "^(([A-Z]|[a-z]){6,10})$",
-    ResultText: "ID must be 6 to 10 alphabetic characters.",
+    ResultText: "아이디는 6~10글자 이내의 영문자로 작성해주세요.",
     Width: 150
   }
 ];
 ```
 
-### Validation Failure Message Options
+### 검증 실패 메시지 옵션
 
-| Property | Display Method | Description |
-|----------|---------------|-------------|
-| `ResultText` | `alert()` dialog | Displays a browser alert message on validation failure |
-| `ResultMessage` | DIV layer popup | Displays a popup message inside the ibsheet8 on validation failure |
-| `ResultMessageTime` | - | Sets the display duration (ms) for the ResultMessage popup |
+| 속성 | 표시 방식 | 설명 |
+|------|----------|------|
+| `ResultText` | `alert()` 경고창 | 검증 실패 시 브라우저 alert 메시지 표시 |
+| `ResultMessage` | DIV 레이어 팝업 | 검증 실패 시 시트 내부에 팝업 메시지 표시 |
+| `ResultMessageTime` | - | ResultMessage 팝업의 표시 시간(ms) 설정 |
 
-### onResultMask Event
+### onResultMask 이벤트
 
-An event that fires on ResultMask validation failure. The subsequent behavior is controlled by the return value.
+ResultMask 검증 실패 시 발생하는 이벤트로, 리턴값에 따라 후속 동작을 제어합니다.
 
-| Return Value | Behavior |
-|-------------|----------|
-| `0` (default) | Display the ResultText alert message and continue editing |
-| `1` | Continue editing without a warning message |
-| `2` | End editing without saving the value |
-| `3` | Save the value to the cell and end editing |
-| `4` | Save the value to the cell, end editing, and change the background color to red |
+| 리턴값 | 동작 |
+|--------|------|
+| `0` (기본값) | ResultText의 alert 메시지를 표시하고 편집 계속 |
+| `1` | 경고 메시지 없이 편집 계속 |
+| `2` | 값을 저장하지 않고 편집 종료 |
+| `3` | 값을 셀에 저장하고 편집 종료 |
+| `4` | 값을 셀에 저장하고 편집 종료 + 배경색을 빨간색으로 변경 |
 
 ```javascript
 options.Events = {
   onResultMask: function(evtParam) {
     if (evtParam.col === "userId") {
-      // ID column: continue editing without alert
+      // 아이디 컬럼: alert 없이 편집 계속 진행
       return 1;
     }
     if (evtParam.col === "email") {
-      // Email column: save the invalid value but mark with red background
+      // 이메일 컬럼: 잘못된 값을 저장하되 빨간 배경으로 마킹
       return 4;
     }
   }
 };
 ```
 
-### Checking Validation Results with the Error Cell Attribute
+### Error 셀 속성으로 검증 결과 확인
 
-When ResultMask validation fails, the `Error` attribute of the corresponding cell is set to `1(true)`.
+ResultMask 검증 실패 시 해당 셀의 `Error` 속성이 `1(true)`로 설정됩니다.
 
 ```javascript
 var error = sheet.getAttribute(row, "email", "Error");
 if (error) {
-  // The email cell contains an invalid value
+  // 이메일 셀에 잘못된 값이 입력되어 있음
 }
 ```
 
 ---
 
-## 3. Required Input Check - Required
+## 3. 필수 입력 검사 - Required
 
-Setting `Required: 1` on a column displays a warning message for empty cells in that column when the save function is called, prompting the user to fill them in.
+컬럼에 `Required: 1`을 설정하면 저장 함수 호출 시 해당 컬럼의 빈 셀에 대해 경고 메시지를 표시하고 편집을 유도합니다.
 
 ```javascript
 options.Cols = [
-  { Type: "Text", Name: "name", Header: "Name", Required: 1 },
-  { Type: "Int", Name: "salary", Header: "Salary", Width: 70 }
+  { Type: "Text", Name: "name", Header: "이름", Required: 1 },
+  { Type: "Int", Name: "salary", Header: "급여", Width: 70 }
 ];
 ```
 
-The `RequiredPosition` option allows you to adjust the position of the required input mark displayed in the header.
+`RequiredPosition` 옵션으로 헤더에 표시되는 필수 입력 마크의 위치를 조정할 수 있습니다.
 
 ---
 
-## 4. Validation on Save
+## 4. 저장 시 유효성 검사
 
 ### ValidCheck (Cfg)
 
-Performs validation when save functions (`doSave`, `getSaveJson`, `getSaveString`) are called, and marks cells that failed validation. Focus moves to the first cell that failed validation.
+저장 함수(`doSave`, `getSaveJson`, `getSaveString`) 호출 시 유효성 검사를 수행하고, 실패한 셀을 마킹합니다. 유효성 검사 실패한 첫 셀에 포커스가 이동합니다.
 
-Check items: `EditMask`, `ResultMask`, `Required`, `Size`
+검사 항목: `EditMask`, `ResultMask`, `Required`, `Size`
 
 ```javascript
-// Basic usage - move Focus to failed cell + enter edit mode
+// 기본 사용 - 검사 실패 셀에 Focus 이동 + 편집 상태
 options.Cfg = {
   ValidCheck: true
 };
 
-// Detailed settings - move Focus only, do not enter edit mode
+// 상세 설정 - Focus만 이동, 편집 상태는 만들지 않음
 options.Cfg = {
   ValidCheck: {
     Focus: 1,
@@ -169,38 +169,38 @@ options.Cfg = {
   }
 };
 
-// Customize the message displayed on validation failure
+// 유효성 검사 실패 시 표시할 메시지 커스터마이징
 options.Cfg = {
   ValidCheck: true,
-  ValidateMessage: "Please check the input values again."
+  ValidateMessage: "입력값을 다시 확인해 주세요."
 };
 ```
 
-> **Note**: When `ValidCheck` is `false` (default), only `Required` validation is performed when the save function is called. It must be set to `true` or an `object` to also perform `EditMask`, `ResultMask`, and `Size` checks.
+> **주의**: `ValidCheck`가 `false`(기본값)인 경우, 저장 함수 호출 시 `Required` 유효성 검사만 수행됩니다. `true` 또는 `object`로 설정해야 `EditMask`, `ResultMask`, `Size` 검사까지 수행됩니다.
 
-### onValidation Event
+### onValidation 이벤트
 
-An event that fires per cell during save function calls, handling custom validation based on business logic. Returning `true` stops the save.
+저장 함수 호출 시 셀별로 순회하며 발생하는 이벤트로, 업무 로직에 따른 커스텀 유효성 검사를 처리합니다. `true`를 리턴하면 저장을 중단합니다.
 
 ```javascript
 options.Events = {
   onValidation: function(evtParam) {
-    // Check only a specific column
+    // 특정 컬럼만 검사
     if (evtParam.col !== "TextData") return;
 
     var prevCol = evtParam.sheet.getPrevCol(evtParam.col);
 
-    // Stop save if the previous column value is 100 or more
+    // 이전 컬럼 값이 100 이상이면 저장 중단
     if (evtParam.sheet.getValue(evtParam.row, prevCol) >= 100) {
       var index = evtParam.sheet.getRowIndex(evtParam.row);
 
       evtParam.sheet.showMessageTime({
-        message: "The Integer(Int) column cell value in row " + index + " is greater than 100.",
+        message: index + "행 정수(Int)컬럼 셀 값이 100보다 큽니다.",
         time: 10000,
-        buttons: ["OK", "Cancel"]
+        buttons: ["OK", "취소"]
       });
 
-      return true; // Stop save
+      return true; // 저장 중단
     }
   }
 };
@@ -208,38 +208,38 @@ options.Events = {
 
 ---
 
-## Comprehensive Example
+## 종합 예제
 
-An example that applies EditMask, ResultMask, Required, ValidCheck, and onValidation together.
+EditMask, ResultMask, Required, ValidCheck, onValidation을 함께 적용하는 예제입니다.
 
 ```javascript
 var options = {
   Cfg: {
     ValidCheck: true,
-    ValidateMessage: "Please check the input values."
+    ValidateMessage: "입력값을 확인해 주세요."
   },
   Cols: [
     {
-      Header: "Name", Name: "name", Type: "Text",
+      Header: "이름", Name: "name", Type: "Text",
       Required: 1,
       Width: 100
     },
     {
-      Header: "Code", Name: "code", Type: "Text",
-      EditMask: "^[A-Za-z0-9]*$",       // During editing: only alphanumeric characters allowed
-      ResultMask: "^[A-Z]{2}\\d{4}$",   // On edit completion: validate "AB1234" format
-      ResultText: "Code must be in the format of 2 uppercase letters + 4 digits.",
+      Header: "코드", Name: "code", Type: "Text",
+      EditMask: "^[A-Za-z0-9]*$",       // 편집 중: 영문+숫자만 입력 가능
+      ResultMask: "^[A-Z]{2}\\d{4}$",   // 편집 완료 시: "AB1234" 형식 검증
+      ResultText: "코드는 영문 대문자 2자리 + 숫자 4자리 형식입니다.",
       Width: 120
     },
     {
-      Header: "Email", Name: "email", Type: "Text",
+      Header: "이메일", Name: "email", Type: "Text",
       ResultMask: "^[\\w\\.\\+%-]+@[A-Za-z0-9\\.-]+\\.[A-Za-z]{2,6}$",
-      ResultMessage: "Please enter a valid email address.",
+      ResultMessage: "올바른 이메일 주소를 입력해 주세요.",
       ResultMessageTime: 1000,
       Width: 200
     },
     {
-      Header: "Quantity", Name: "quantity", Type: "Int",
+      Header: "수량", Name: "quantity", Type: "Int",
       Required: 1,
       Width: 80
     }
@@ -247,18 +247,18 @@ var options = {
   Events: {
     onResultMask: function(evtParam) {
       if (evtParam.col === "email") {
-        // Email: save the invalid value but display with red background
+        // 이메일: 잘못된 값도 저장하되 빨간 배경으로 표시
         return 4;
       }
-      // Others: default behavior (display alert then continue editing)
+      // 나머지: 기본 동작(alert 표시 후 편집 계속)
     },
     onValidation: function(evtParam) {
-      // Stop save if quantity is 0 or less
+      // 수량이 0 이하면 저장 중단
       if (evtParam.col === "quantity") {
         var val = evtParam.sheet.getValue(evtParam.row, evtParam.col);
         if (val <= 0) {
           evtParam.sheet.showMessageTime({
-            message: "Quantity must be 1 or greater.",
+            message: "수량은 1 이상이어야 합니다.",
             time: 5000
           });
           return true;
@@ -271,13 +271,13 @@ var options = {
 
 ---
 
-## Validation Flow Summary
+## 유효성 검사 흐름 요약
 
-| Stage | Timing | Property/Event | Behavior |
-|-------|--------|----------------|----------|
-| During editing | On character input | `EditMask` (col/cell) | Block characters that do not match the regular expression |
-| Edit completion | On cell edit end | `ResultMask` + `ResultText`/`ResultMessage` | Validate final value with regular expression, display message on failure |
-| Edit completion | On ResultMask failure | `onResultMask` event | Control subsequent behavior via return value (0~4) |
-| Save | On save function call | `Required` | Check for empty values |
-| Save | On save function call | `ValidCheck` (cfg) | Comprehensive check of EditMask/ResultMask/Required/Size |
-| Save | On save function call | `onValidation` event | Custom business logic validation, stop save on true return |
+| 단계 | 시점 | 속성/이벤트 | 동작 |
+|------|------|-------------|------|
+| 편집 중 | 글자 입력 시 | `EditMask` (col/cell) | 정규식에 맞지 않는 글자 입력 차단 |
+| 편집 완료 | 셀 편집 종료 시 | `ResultMask` + `ResultText`/`ResultMessage` | 최종 값 정규식 검증, 실패 시 메시지 표시 |
+| 편집 완료 | ResultMask 실패 시 | `onResultMask` 이벤트 | 리턴값으로 후속 동작 제어 (0~4) |
+| 저장 | 저장 함수 호출 시 | `Required` | 빈 값 검사 |
+| 저장 | 저장 함수 호출 시 | `ValidCheck` (cfg) | EditMask/ResultMask/Required/Size 종합 검사 |
+| 저장 | 저장 함수 호출 시 | `onValidation` 이벤트 | 커스텀 업무 로직 검증, true 리턴 시 저장 중단 |
