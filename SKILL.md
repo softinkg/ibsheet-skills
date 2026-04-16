@@ -162,6 +162,66 @@ Events: {
 - [assets/templates/framework/react-component.jsx](assets/templates/framework/react-component.jsx) - React component
 - [assets/templates/framework/vue-component.vue](assets/templates/framework/vue-component.vue) - Vue component
 
+## IBSheet8 공식 매뉴얼
+
+IBSheet8 전체 공식 매뉴얼이 `references/ibsheet-official-manual/` 경로에 있습니다. 위 Reference Guide에서 다루지 않는 상세 API, 속성, 이벤트, 스타일 가이드 등이 필요할 때 참고하세요.
+
+## Drag & Drop (트리 그리드)
+
+### onEndDrag 이벤트 타이밍
+
+`onEndDrag`는 **드랍이 확정되기 전에 호출**될 수 있다. 핸들러 안에서 즉시 `getDataRows()`를 호출하면 이동 전 순서가 반환될 수 있으므로, 외부 데이터 소스와 동기화할 때는 `setTimeout(() => {...}, 0)`으로 감싸서 IBSheet 내부 처리 완료 후에 수행해야 한다.
+
+### onEndDrag evt.type
+
+| type | 의미 |
+|------|------|
+| 0 | 드래그 불가 |
+| 1 | `torow` 위쪽에 드랍 |
+| 2 | `torow`의 자식 노드에 드랍 (트리) |
+| 3 | `torow` 아래쪽에 드랍 |
+| 4 | 시트 외부 영역에 드랍 |
+
+리턴 값으로 동일한 값을 지정하여 드랍 위치를 오버라이드하거나, 0을 리턴하여 드래그를 취소할 수 있다.
+
+### 드래그 후 행 객체 속성
+
+`getDataRows()` 반환 배열의 각 행 객체에 다음 속성이 설정된다:
+
+| 속성 | 설명 |
+|------|------|
+| `Moved: 1` | 사용자 드래그로 이동된 행에만 설정 |
+| `OrgIndex` | 이동 전 위치 (1-based) |
+| `HasIndex` | 현재 위치 (1-based, 첫 행 = 1) |
+
+### 드래그 활성화 설정
+
+```javascript
+Cfg: {
+  CanDrag: 1,     // 행 드래그 허용
+  MainCol: 'name' // 트리의 메인 컬럼 (트리 그리드 필수)
+}
+```
+
+### React에서 onEndDrag + 외부 상태 동기화 패턴
+
+```javascript
+Events: {
+  onEndDrag: (evt) => handleEndDragRef.current(evt),
+}
+
+// 핸들러 (useRef 패턴 — stale closure 방지)
+handleEndDragRef.current = (evt) => {
+  if (evt.type === 0 || evt.type === 4) return
+
+  // 반드시 setTimeout으로 감싸서 IBSheet 내부 행 이동 완료 후 동기화
+  setTimeout(() => {
+    const dataRows = sheet.getDataRows() // 이동 완료된 순서
+    // ... 외부 데이터 소스 동기화
+  }, 0)
+}
+```
+
 ## Important Notes
 
 1. **Initialization Timing**: Call `IBSheet.create()` after `DOMContentLoaded` or after the container is rendered
