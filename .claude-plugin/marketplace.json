@@ -15,8 +15,8 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "./ibsheet7-skill",
-        "./ibsheet8-skill"
+        "./skills/ibsheet7",
+        "./skills/ibsheet8"
       ]
     }
   ]
