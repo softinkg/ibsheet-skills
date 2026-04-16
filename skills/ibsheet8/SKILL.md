@@ -1,6 +1,6 @@
 ---
 name: ibsheet8
-description: IBSheet8 (version 8) grid library development support. Activated in projects that create ibsheet8 using IBSheet.create() with Cfg/Cols/Events option structure. Use this skill for: (1) IBSheet8 grid creation and initialization, (2) data binding and CRUD implementation, (3) column configuration and cell editor setup, (4) event handling, (5) server communication implementation, (6) advanced features like tree grid, pivot, and grouping, (7) React/Vue framework integration, (8) performance optimization. Use this skill when the project contains IBSheet.create, ibsheetloader, or ibsheet8 keywords. Trigger keywords: ibsheet8, IBSheet.create, ibsheetloader, IBSheet8, grid, sheet
+description: "IBSheet8 (version 8) grid library development support. Activated in projects that create ibsheet8 using IBSheet.create() with Cfg/Cols/Events option structure. Use this skill for: (1) IBSheet8 grid creation and initialization, (2) data binding and CRUD implementation, (3) column configuration and cell editor setup, (4) event handling, (5) server communication implementation, (6) advanced features like tree grid, pivot, and grouping, (7) React/Vue framework integration, (8) performance optimization. Use this skill when the project contains IBSheet.create, ibsheetloader, or ibsheet8 keywords. Trigger keywords: ibsheet8, IBSheet.create, ibsheetloader, IBSheet8, grid, sheet"
 ---
 
 # IBSheet Development Guide
