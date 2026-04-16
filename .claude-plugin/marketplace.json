@@ -1,0 +1,23 @@
+{
+  "name": "ibsheet-skills",
+  "owner": {
+    "name": "softinkg",
+    "email": "AI_temp2@softin.co.kr"
+  },
+  "metadata": {
+    "description": "IBSheet grid component development skills (v7, v8)",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "ibsheet-all",
+      "description": "IBSheet7 and IBSheet8 grid component development skills",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./ibsheet7-skill",
+        "./ibsheet8-skill"
+      ]
+    }
+  ]
+}
